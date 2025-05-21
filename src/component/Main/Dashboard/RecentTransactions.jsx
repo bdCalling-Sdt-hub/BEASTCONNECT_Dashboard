@@ -154,7 +154,7 @@ const RecentTransactions = () => {
   };
 
   return (
-    <div className="w-full col-span-full md:col-span-6 bg-white rounded-lg p-6">
+    <div className="w-full col-span-full md:col-span-6 bg-white rounded-lg ">
       <div className="flex items-center justify-between flex-wrap my-10">
         <h1 className="text-2xl flex items-center">Recent Users</h1>
         {/* Optional: You can add a search input here */}
@@ -165,7 +165,7 @@ const RecentTransactions = () => {
         theme={{
           components: {
             Table: {
-              headerBg: "#80d6f9",
+              headerBg: "#02aef4",
               headerColor: "#fff",
               headerBorderRadius: 5,
             },
