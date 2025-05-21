@@ -1,258 +1,280 @@
-import React, { useState } from 'react';
-import { Modal, Input, Upload, message } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
-import subscriptionImage from '/public/category/category.png'; // You can replace with actual image for subscriptions
-import { FaPlus } from 'react-icons/fa';
-import { useCreateSubScriptionMutation, useDeleteSubScriptionMutation, useGetSubScriptionQuery, useUpdateScriptionMutation } from '../../redux/features/subscription/subscription';
+import React, { useState } from "react";
+import { Modal, Input, message } from "antd";
+import { FaPlus, FaTrash } from "react-icons/fa";
+import { IoAdd, IoCheckmark } from "react-icons/io5";
 
 const Subscription = () => {
-    const [isModalVisible, setIsModalVisible] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
-    const [subscriptionName, setSubscriptionName] = useState('');
-    const [price, setPrice] = useState('');
-    const [description, setDescription] = useState('');
-    const [duration, setDuration] = useState('weekly');
-    const [id, setId] = useState('');
-
-    // console.log(description);
-
-    const { data: getAllSubScription, isLoading } = useGetSubScriptionQuery();
-    const [createSubScription] = useCreateSubScriptionMutation();
-    const [updateSubScription] = useUpdateScriptionMutation();
-    const [deleteSubScription] = useDeleteSubScriptionMutation();
-    // console.log('subscription', getAllSubScription?.data);
-
-    // Fake data for subscriptions
-    const subscriptions = [
+    const [subscriptions, setSubscriptions] = useState([
         {
             id: 1,
-            name: 'Weekly Plan',
-            price: '$5.50/week',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-            image: subscriptionImage,
+            name: "Weekly Plan",
+            price: "5.50",
+            duration: "Weekly",
+            coins: 50,
+            features: ["Feature 1", "Feature 2"],
         },
         {
             id: 2,
-            name: 'Monthly Plan',
-            price: '$20/month',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-            image: subscriptionImage,
+            name: "Monthly Plan",
+            price: "20",
+            duration: "Monthly",
+            coins: 200,
+            features: ["Feature A", "Feature B", "Feature C"],
         },
-        {
-            id: 3,
-            name: 'Yearly Plan',
-            price: '$200/year',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-            image: subscriptionImage,
-        },
-    ];
+    ]);
 
-    // Handle open modal for adding or editing
-    const showModal = (edit = false, subscription = {}) => {
-        console.log(subscription);
-        setIsEditing(edit);
-        setIsModalVisible(true);
-        if (edit) {
-            setSubscriptionName(subscription.name);
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+
+    // Form fields state
+    const [id, setId] = useState(null);
+    const [name, setName] = useState("");
+    const [price, setPrice] = useState("");
+    const [duration, setDuration] = useState("Weekly");
+    const [coins, setCoins] = useState("");
+    const [features, setFeatures] = useState([""]);
+
+    // Open modal for add or edit
+    const openModal = (subscription = null) => {
+        if (subscription) {
+            setIsEditing(true);
+            setId(subscription.id);
+            setName(subscription.name);
             setPrice(subscription.price);
-            setDescription(subscription.details);
-            setId(subscription.id); // Pre-fill for editing
+            setDuration(subscription.duration);
+            setCoins(subscription.coins);
+            setFeatures(subscription.features.length > 0 ? subscription.features : [""]);
         } else {
-            setSubscriptionName('');
-            setPrice('');
-            setDescription('');
-            setId(null);
+            resetForm();
+            setIsEditing(false);
+            setDuration("Monthly"); // default duration on add
         }
+        setIsModalVisible(true);
     };
 
-    // Handle modal close
-    const handleCancel = () => {
+    const closeModal = () => {
         setIsModalVisible(false);
-        setSubscriptionName('');
-        setPrice('');
-        setDescription('');
+        resetForm();
     };
 
-    // Handle form submit for adding/editing subscription
-    const handleSubmit = async (e) => {
+    const resetForm = () => {
+        setId(null);
+        setName("");
+        setPrice("");
+        setDuration("Monthly");
+        setCoins("");
+        setFeatures([""]);
+    };
+
+    // Handle feature change
+    const handleFeatureChange = (index, value) => {
+        const newFeatures = [...features];
+        newFeatures[index] = value;
+        setFeatures(newFeatures);
+    };
+
+    // Add new feature input
+    const addFeature = () => {
+        setFeatures([...features, ""]);
+    };
+
+    // Remove a feature input
+    const removeFeature = (index) => {
+        if (features.length === 1) return; // Keep at least one input
+        const newFeatures = features.filter((_, i) => i !== index);
+        setFeatures(newFeatures);
+    };
+
+    // Add or update subscription
+    const handleSubmit = (e) => {
         e.preventDefault();
-        if (!subscriptionName || !price || !description) {
-            message.error('Please fill all fields!');
+
+        if (!name.trim() || !price.trim() || !duration.trim() || !coins) {
+            message.error("Please fill all required fields!");
             return;
         }
 
-        console.log('subscriptionName', subscriptionName, 'price', price, 'description', description, 'duration', duration);
+        // Clean features list, remove empty strings
+        const cleanedFeatures = features.filter((f) => f.trim() !== "");
 
-        const formData = {
-            name: subscriptionName,
-            price: price,
-            details: description,
-            duration: duration
+        if (isEditing) {
+            setSubscriptions((prev) =>
+                prev.map((sub) =>
+                    sub.id === id
+                        ? { id, name, price, duration, coins, features: cleanedFeatures }
+                        : sub
+                )
+            );
+            message.success("Subscription updated!");
+        } else {
+            const newSubscription = {
+                id: subscriptions.length > 0 ? subscriptions[subscriptions.length - 1].id + 1 : 1,
+                name,
+                price,
+                duration,
+                coins,
+                features: cleanedFeatures,
+            };
+            setSubscriptions((prev) => [...prev, newSubscription]);
+            message.success("Subscription added!");
         }
 
-        try {
-
-            const res = await createSubScription(formData).unwrap();
-            console.log(res);
-            // if(res?.data?.error){
-            //     message.error(res?.data?.error?.data?.message);
-            // }
-            if (res?.message) {
-                message.success(res?.message);
-                setDescription('');
-                handleCancel();
-            }
-
-
-        } catch (error) {
-            console.log(error);
-            message.error('Something went wrong');
-            setDescription('');
-        }
-
-        console.log('formData', formData);
-
-        setDescription('');
-    };
-    const handleUpdate = async (e) => {
-        e.preventDefault();
-        const formData = {
-            name: subscriptionName,
-            price: price,
-            details: description,
-            duration: duration,
-            id: id
-        }
-
-        try {
-
-            const res = await updateSubScription(formData).unwrap();
-            console.log(res);
-
-            if (res?.message) {
-                message.success(res?.message);
-                setDescription('');
-                handleCancel();
-            }
-
-        } catch (error) {
-            console.log(error);
-        }
-
-
-        console.log('formData', formData);
-
-        // setIsEditing(true);
-        // showModal(true);
+        closeModal();
     };
 
-
-
-    const handleDelete = async (subscription) => {
-        console.log(subscription.id);
-
-        try {
-            const res = await deleteSubScription(subscription.id).unwrap();
-            if (res?.message) {
-                message.success(res?.message);
-            }
-        }
-        catch (error) {
-            console.log(error);
-        }
-    }
+    // Delete subscription
+    const handleDelete = (subId) => {
+        setSubscriptions((prev) => prev.filter((sub) => sub.id !== subId));
+        message.success("Subscription deleted!");
+    };
 
     return (
-        <section>
-            <div className="w-full md:flex justify-end items-center py-6">
+        <section className="p-5">
+            <div className="flex justify-end mb-6">
                 <button
-                    type="primary"
-                    className=" text-xl px-2 md:px-5 py-3 bg-[#038c6d] text-white flex justify-center items-center gap-1 rounded md:mb-0"
-                    onClick={() => showModal(false)}
+                    className="flex items-center gap-2 px-5 py-3 bg-[#02aef4] text-white rounded"
+                    onClick={() => openModal()}
                 >
-                    <FaPlus className='text-xl font-semibold text-white' />  Add Subscription
+                    <FaPlus /> Add Subscription
                 </button>
             </div>
 
-            <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-5">
-                {getAllSubScription?.data?.map((subscription) => (
-                    <div key={subscription.id} className="border-shadow pb-5 rounded-lg overflow-hidden">
+            {/* Subscription list */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
+                {subscriptions.map((sub) => (
+                    <div
+                        key={sub.id}
+                        className="border rounded-lg shadow-md flex flex-col justify-between"
+                    >
                         <div>
-                            <h2 className="my-5 text-3xl font-semibold text-center">{subscription.name}</h2>
-                            <p className="text-center text-xl">${subscription.price} / {subscription.duration}</p>
-                            <p className="my-5 px-5 text-base">{subscription.details}</p>
+                            <h3 className="text-2xl font-semibold mb-1 border-b border-[#02aef4] text-center py-2">
+                                {sub.name}
+                            </h3>
+                            <div className="p-5">
+                                <p className="flex items-center justify-center mb-2 gap-2 text-5xl text-center ">
+                                    ${sub.price == 0 ? "Free" : sub.price}
+                                    <sub className="text-sm">/ {sub.duration}</sub>
+                                </p>
+                                <p className="font-semibold mb-3">Coins: {sub.coins}</p>
+                                {sub.features && sub.features.length > 0 && (
+                                    <ul className="text-gray-600 space-y-1">
+                                        {sub.features.map((f, idx) => (
+                                            <li className="flex items-center gap-2" key={idx}>
+                                                <IoCheckmark /> {f}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
                         </div>
-                        <div className="grid grid-cols-2 gap-3 px-5">
-                            <button onClick={() => handleDelete(subscription)} className="w-full py-3 px-6 border border-[#038c6d] rounded-lg" >
-                                Delete
+                        <div className="grid grid-cols-2 gap-2 mt-4 p-2">
+                            <button
+                                className="py-2 px-4 bg-[#02aef4] text-white rounded hover:bg-[#2f8eb4]"
+                                onClick={() => openModal(sub)}
+                            >
+                                Edit Subscription
                             </button>
-                            <button onClick={() => showModal(true, subscription)} className="w-full py-3 px-6 border bg-[#038c6d] text-white rounded-lg">
-                                Edit Package
+                            <button
+                                className="py-2 px-4 bg-red-500 text-white rounded hover:bg-red-600"
+                                onClick={() => handleDelete(sub.id)}
+                            >
+                                Delete
                             </button>
                         </div>
                     </div>
                 ))}
             </div>
 
-            {/* Modal for adding/editing subscription */}
+            {/* Modal for Add/Edit */}
             <Modal
-                title={isEditing ? 'Edit Subscription' : 'Add Subscription'}
                 visible={isModalVisible}
-                onCancel={handleCancel}
-                footer={null} // Remove default cancel and ok buttons
+                onCancel={closeModal}
+                footer={null}
+                destroyOnClose
             >
-                <form onSubmit={isEditing ? handleUpdate : handleSubmit} action="">
-                    <div className="mb-4">
-                        <span className="block mb-2 font-semibold">Subscription Package name</span>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <h2 className="text-2xl font-semibold mb-5 text-center">
+                        {isEditing ? "Edit Subscription" : "Add Subscription"}
+                    </h2>
+                    <div>
+                        <label className="block font-semibold mb-1">Subscription Name *</label>
                         <Input
+                            value={name}
+                            onChange={(e) => setName(e.target.value)}
                             placeholder="Enter subscription name"
-                            value={subscriptionName}
-                            onChange={(e) => setSubscriptionName(e.target.value)}
+                            required
                         />
                     </div>
 
-                    <div className='my-3'>
-                        <span className='block mb-2 font-semibold'>Subscription Duration</span>
-                        <select className='w-full border border-gray-300 rounded-md p-2' onChange={(e) => setDuration(e.target.value)} name="duration" value={duration} id="" >
-                            <option value="weekly">Weekly</option>
-                            <option value="monthly">Monthly</option>
-                            <option value="yearly">Yearly</option>
+                    <div>
+                        <label className="block font-semibold mb-1">Subscription Price *</label>
+                        <Input
+                            type="number"
+                            value={price}
+                            onChange={(e) => setPrice(e.target.value)}
+                            placeholder="Enter price"
+                            min={0}
+                            required
+                        />
+                    </div>
+
+                    <div className="mb-4">
+                        <label className="block font-semibold mb-1">Subscription Duration *</label>
+                        <select
+                            className="w-full p-2 border border-gray-300 rounded"
+                            name="duration"
+                            id="duration"
+                            value={duration}
+                            onChange={(e) => setDuration(e.target.value)}
+                            required
+                        >
+                            <option value="Weekly">Weekly</option>
+                            <option value="Monthly">Monthly</option>
+                            <option value="Yearly">Yearly</option>
                         </select>
                     </div>
 
-                    <div className="mb-4">
-                        <span className="block mb-2 font-semibold">Subscription Package Price</span>
-                        <Input
-                            placeholder="Enter price"
-                            value={price}
-                            type="number"
-                            onChange={(e) => setPrice(e.target.value)}
-                        />
-                    </div>
-                    <div className="mb-4">
-                        <span className="block mb-2 font-semibold">Subscription Package Details</span>
-                        <textarea
-                            className='w-full h-40 border border-gray-300 rounded-md p-2'
-                            placeholder="Enter subscription description"
-                            defaultValue={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            rows={4}
-                        />
+                    <div>
+                        <label className="block font-semibold mb-2">Features</label>
+                        {features.map((feature, idx) => (
+                            <div key={idx} className="flex items-center gap-2 mb-2">
+                                <Input
+                                    value={feature}
+                                    onChange={(e) => handleFeatureChange(idx, e.target.value)}
+                                    placeholder={`Feature #${idx + 1}`}
+                                    required={idx === 0}
+                                />
+                                <button
+                                    type="button"
+                                    className="text-red-600 hover:text-red-800"
+                                    onClick={() => removeFeature(idx)}
+                                    disabled={features.length === 1}
+                                    aria-label="Remove feature"
+                                >
+                                    <FaTrash />
+                                </button>
+                            </div>
+                        ))}
+                        <button
+                            type="button"
+                            onClick={addFeature}
+                            className="flex items-center gap-2 justify-center py-1 px-3 mt-2 bg-[#02aef4] w-full text-white rounded hover:bg-[#218fbb]"
+                        >
+                            <IoAdd />Add Feature
+                        </button>
                     </div>
 
                     <button
-                        type="primary"
-                        className="w-full py-3 bg-[#038c6d] text-white"
-                    // onClick={handleSubmit}
+                        type="submit"
+                        className="w-full py-3 bg-[#02aef4] text-white rounded hover:bg-[#0284c7]"
                     >
-                        {isEditing ? 'Update Subscription' : 'Add Subscription'}
+                        {isEditing ? "Update Subscription" : "Add Subscription"}
                     </button>
                 </form>
-
-
             </Modal>
         </section>
     );
 };
 
 export default Subscription;
+// This code is a React component for managing subscriptions.

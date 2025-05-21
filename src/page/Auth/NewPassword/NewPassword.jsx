@@ -121,7 +121,7 @@ const NewPassword = () => {
 
             {/* CustomButton for submission */}
             <Form.Item>
-              <button className="w-full bg-[#84df91] text-xl font-semibold text-white rounded-md py-2" loading={isLoading} border >
+              <button className="w-full bg-[#02aef4] text-xl font-semibold text-white rounded-md py-2" loading={isLoading} border >
                 Update Password
               </button>
             </Form.Item>

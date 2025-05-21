@@ -1,70 +1,126 @@
-import { useState } from "react";
-import { MdKeyboardArrowDown, MdKeyboardArrowUp } from "react-icons/md";
-import { FaAngleLeft } from "react-icons/fa";
+import React, { useState } from "react";
 import { Pagination } from "antd";
-import EventItemCard from "./EventItemCard";
+import { FaChevronLeft, FaMapMarkerAlt } from "react-icons/fa";
+import { Link } from "react-router-dom";
+
+const sampleData = [
+    {
+        id: "1",
+        name: "Afsana hamid mim",
+        location: "New York, US",
+        challengeName: "2min Burger Challenge",
+        challengeScore: 20,
+        coins: 20,
+        time: "2 Day 2 Hour 5min",
+        description: "Just ......",
+        imageUrl: "https://randomuser.me/api/portraits/women/44.jpg",
+        videoThumbnail: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=60",
+    },
+    {
+        id: "2",
+        name: "John Doe",
+        location: "Paris, France",
+        challengeName: "10k Step Challenge",
+        challengeScore: 50,
+        coins: 50,
+        time: "1 Day 3 Hour",
+        description: "Walking challenge",
+        imageUrl: "https://randomuser.me/api/portraits/men/45.jpg",
+        videoThumbnail: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=800&q=60",
+    },
+    // Add more items if you want
+];
 
 const EventItems = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedFilter, setSelectedFilter] = useState("All");
-  const [activeTab, setActiveTab] = useState("Recent Tournament");
+    const [currentPage, setCurrentPage] = useState(1);
+    const pageSize = 2;
 
-  const tabs = ["Recent Tournament", "Approved Tournament", "History Tournament"];
-  const items = [
-    { id: 1, name: "Piano Star Event", type: "Big Tournament", image: { url: "https://i.ibb.co/gzTFS5h/Rectangle-34624152.png" }, program: "Piano", address: "Dhaka", cost: 100, deadline: "2024-11-20", tab: "Recent Tournament" },
-    { id: 2, name: "Guitar Concert", type: "Small Tournament", image: { url: "https://i.ibb.co/gzTFS5h/Rectangle-34624152.png" }, program: "Guitar", address: "Chittagong", cost: 80, deadline: "2024-12-01", tab: "Approved Tournament" },
-    { id: 3, name: "Drum Session", type: "Big Tournament", image: { url: "https://i.ibb.co/gzTFS5h/Rectangle-34624152.png" }, program: "Drums", address: "Sylhet", cost: 90, deadline: "2024-10-01", tab: "History Tournament" },
-    { id: 4, name: "Flute Workshop", type: "Small Tournament", image: { url: "https://i.ibb.co/gzTFS5h/Rectangle-34624152.png" }, program: "Flute", address: "Khulna", cost: 75, deadline: "2024-11-20", tab: "Recent Tournament" },
-  ];
+    // Calculate the current page data slice
+    const paginatedData = sampleData.slice(
+        (currentPage - 1) * pageSize,
+        currentPage * pageSize
+    );
 
-  const filteredItems = items.filter((item) => item.tab === activeTab);
+    return (
+        <div className="p-5  ">
+            <h1 className="text-2xl font-semibold mb-6 flex items-center gap-2 cursor-pointer">
+                <FaChevronLeft /> Challenges List
+            </h1>
 
-  return (
-    <>
-      <div className="w-full flex justify-between items-center py-4">
-        <h1 className="text-2xl flex items-center">
-          <FaAngleLeft /> All Tournament
-        </h1>
-      </div>
+            {paginatedData.map((item) => (
+                <div
+                    key={item.id}
+                    className="flex items-center border border-blue-300 rounded-lg mb-4 p-4 bg-blue-50"
+                >
+                    {/* Left: Profile Image */}
+                    <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="w-16 h-16 rounded-full object-cover mr-6"
+                    />
 
-      {/* Tabs */}
-      <div className="border-b border-[#f1bd19] mb-10">
-        {tabs.map((tab) => (
-          <button
-            key={tab}
-            onClick={() => {
-              setActiveTab(tab);
-              setCurrentPage(1);
-            }}
-            className={`px-6 py-2 ${activeTab === tab ? "border-b-4 border-[#f1bd19]" : "text-black"}`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
+                    {/* Middle: Info */}
+                    <div className="flex-grow">
+                        <h2 className="font-semibold text-lg">{item.name}</h2>
+                        <p className="flex items-center text-gray-600 text-sm mb-3">
+                            <FaMapMarkerAlt className="mr-1" /> {item.location}
+                        </p>
+                        <hr className="my-2" />
+                        <div className="grid grid-cols-5 gap-4 text-sm">
+                            <div>
+                                <div className="font-semibold">Challenge Name</div>
+                                <div>{item.challengeName}</div>
+                            </div>
+                            <div>
+                                <div className="font-semibold">Challenge Score</div>
+                                <div>{item.challengeScore}</div>
+                            </div>
+                            <div>
+                                <div className="font-semibold">Coins</div>
+                                <div>{item.coins}</div>
+                            </div>
+                            <div>
+                                <div className="font-semibold">Time</div>
+                                <div>{item.time}</div>
+                            </div>
+                            <div>
+                                <div className="font-semibold">Description</div>
+                                <div>{item.description}</div>
+                            </div>
+                        </div>
+                    </div>
 
-      {/* Items */}
-      <div className="w-full">
-        {filteredItems.length > 0 ? (
-          filteredItems.slice((currentPage - 1) * 4, currentPage * 4).map((item) => (
-            <EventItemCard key={item.id} item={item} activeTab={activeTab} />
-          ))
-        ) : (
-          <div className="text-center py-10">No events found.</div>
-        )}
-      </div>
+                    {/* Right: Video thumbnail + View Details button */}
+                    <div className="flex flex-col items-center ml-6">
+                        <img
+                            src={item.videoThumbnail}
+                            alt="Video thumbnail"
+                            className="w-24 h-14 rounded-md mb-3 object-cover cursor-pointer"
+                        />
+                        <Link
+                            to={`/event/${item.id}`}
+                            className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-8 rounded"
+                        >
+                            View Details
+                        </Link>
+                    </div>
+                </div>
+            ))}
 
-      {/* Pagination */}
-      <div className="flex justify-center py-4">
-        <Pagination
-          current={currentPage}
-          total={filteredItems.length}
-          pageSize={4}
-          onChange={(page) => setCurrentPage(page)}
-        />
-      </div>
-    </>
-  );
+            {/* Pagination */}
+            <div className="flex justify-end mt-6">
+                <Pagination
+                    current={currentPage}
+                    pageSize={pageSize}
+                    total={sampleData.length}
+                    showTotal={(total) => `Total ${total} items`}
+                    onChange={setCurrentPage}
+                    showSizeChanger={false}
+                    style={{ color: "#02aef4" }}
+                />
+            </div>
+        </div>
+    );
 };
 
 export default EventItems;

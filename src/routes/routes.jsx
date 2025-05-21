@@ -46,6 +46,16 @@ import AllFaq from "../page/Faq/AllFaq";
 import AllDocument from "../component/Main/AllDocument/AllDocument";
 import Lawyera from "../page/Lawyer/Lawyera";
 import PrivetRoute from "../PrivetRoute/PrivetRoute";
+import UserEventDetails from "../page/Users/UserEventDetails";
+import ChallengesDetials from "../page/Lawyer/ChallengesDetials";
+import ChallengesUserDetials from "../page/Lawyer/ChallengesUserDetials";
+import CategoriesPageDetials from "../component/Main/CategoriesBox/CategoriesPageDetials";
+import CategoriesUserPageDetials from "../component/Main/CategoriesBox/CategoriesUserPageDetials";
+import EventItemsDetails from "../component/Main/Event/EventItemsDetails";
+import Videoschedule from "../page/Videoschedule/Videoschedule";
+import VideoscheduleDetails from "../page/Videoschedule/VideoscheduleDetails";
+import UserReport from "../page/UserReport/UserReport";
+import UserReportDetails from "../page/UserReport/UserReportDetails";
 
 
 
@@ -55,7 +65,9 @@ const router = createBrowserRouter([
     element: (
       // <AdminRoutes>
       // </AdminRoutes>
-      <PrivetRoute>  <MainLayout /></PrivetRoute>
+      // <PrivetRoute>  
+      <MainLayout />
+      // </PrivetRoute>
     ),
     errorElement: <h1>Error</h1>,
     children: [
@@ -71,22 +83,62 @@ const router = createBrowserRouter([
         path: "users/:id",
         element: <UserDetails />,
       },
+      {
+        path: "users/event/:id",
+        element: <UserEventDetails />,
+      },
 
       {
-        path: "lawyer",
+        path: "challenges",
         element: <Lawyera />,
       },
-
+      {
+        path: "challenges/:id",
+        element: <ChallengesDetials />,
+      },
+      {
+        path: "challenges/user/:id",
+        element: <ChallengesUserDetials />,
+      },
 
       {
-        path: "assets",
+        path: "connection",
         element: <CategoriesPage />,
       },
+      {
+        path: "connection/:id",
+        element: <CategoriesPageDetials />,
+      },
+      {
+        path: "connection/user/:id",
+        element: <CategoriesUserPageDetials />,
+      },
+
+
 
       {
-        path: "collaborator",
-        element: <Collaborator />,
+        path: "event",
+        element: <EventItems />,
       },
+
+      {
+        path: "event/:id",
+        element: <EventItemsDetails />,
+      },
+
+
+
+
+      {
+        path: "video-schedule",
+        element: <Videoschedule />,
+      },
+      {
+        path: "video-schedule/:id",
+        element: <VideoscheduleDetails />,
+      },
+
+
       {
         path: "collaborator/:id",
         element: <CollaboratorDetails />,
@@ -103,17 +155,31 @@ const router = createBrowserRouter([
       },
 
       {
+        path: "user-report",
+        element: <UserReport />,
+      },
+      {
+        path: "user-report/:id",
+        element: <UserReportDetails />,
+      },
+
+      {
         path: "/notification",
         element: <Notification />,
       },
+
+
+
       {
         path: "settings",
         element: <SettingsPage />,
       },
+
       {
         path: "settings/all-faq",
         element: <AllFaq />,
       },
+      
       {
         path: "settings/personal-info",
         element: <Personalinfo />,

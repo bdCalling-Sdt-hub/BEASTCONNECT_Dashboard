@@ -89,7 +89,7 @@ const ForgetPassword = () => {
               loading={isLoading}
               border
               type="submit"
-              className="w-full bg-[#84df91] text-xl font-semibold text-white rounded-md py-2"
+              className="w-full bg-[#02aef4] text-xl font-semibold text-white rounded-md py-2"
             >
               Send Verification Code
             </button>

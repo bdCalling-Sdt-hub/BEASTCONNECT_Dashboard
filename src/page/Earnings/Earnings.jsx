@@ -4,50 +4,80 @@ import { Modal, Pagination } from "antd";
 import { IoSearchOutline } from "react-icons/io5";
 import { HiOutlineDotsHorizontal } from "react-icons/hi";
 import { jsPDF } from "jspdf";
-import { useGetEarningsQuery } from "../../redux/features/earnings/earningsApi";
+
+const staticEarningsData = [
+  {
+    id: "1",
+    transactionId: "TX123456789",
+    currency: "USD",
+    amount: "150.00",
+    status: "Completed",
+    updatedAt: "2024-05-01T12:30:00Z",
+    userName: "John Doe",
+    location: "New York",
+    date: "01 May 2024",
+    subscriptionType: "Premium",
+  },
+  {
+    id: "2",
+    transactionId: "TX987654321",
+    currency: "EUR",
+    amount: "200.00",
+    status: "Completed",
+    updatedAt: "2024-05-03T15:45:00Z",
+    userName: "Jane Smith",
+    location: "London",
+    date: "03 May 2024",
+    subscriptionType: "Basic",
+  },
+  {
+    id: "3",
+    transactionId: "TX112233445",
+    currency: "GBP",
+    amount: "300.00",
+    status: "Completed",
+    updatedAt: "2024-05-05T09:20:00Z",
+    userName: "Alice Johnson",
+    location: "Paris",
+    date: "05 May 2024",
+    subscriptionType: "Standard",
+  },
+  // Add more sample records as needed
+];
 
 const Earnings = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = 2;
   const [searchText, setSearchText] = useState("");
   const [searchDate, setSearchDate] = useState("");
 
-  // ✅ Fetch earnings data
-  const { data: earningsData, isLoading } = useGetEarningsQuery({
-    from: (currentPage - 1) * pageSize,
-    to: currentPage * pageSize,
-  });
+  const [filteredEarnings, setFilteredEarnings] = useState(staticEarningsData);
 
-  console.log("Fetched Earnings Data:", earningsData);
-
-  // ✅ Store API data in state for filtering
-  const [filteredEarnings, setFilteredEarnings] = useState([]);
   useEffect(() => {
-    setFilteredEarnings(earningsData || []);
-  }, [earningsData]);
+    let filtered = staticEarningsData;
 
-  // ✅ Handle Search
-  useEffect(() => {
-    let filteredData = earningsData || [];
-
-    // Filter by Name
     if (searchText.trim() !== "") {
-      filteredData = filteredData.filter((row) =>
-        row.userName?.toLowerCase().includes(searchText.toLowerCase())
+      filtered = filtered.filter((row) =>
+        row.transactionId.toLowerCase().includes(searchText.toLowerCase())
       );
     }
 
-    // Filter by Date
     if (searchDate.trim() !== "") {
-      filteredData = filteredData.filter(
-        (row) => new Date(row.updatedAt).toISOString().split("T")[0] === searchDate
+      filtered = filtered.filter(
+        (row) => row.updatedAt.split("T")[0] === searchDate
       );
     }
 
-    setFilteredEarnings(filteredData);
-  }, [searchText, searchDate, earningsData]);
+    setFilteredEarnings(filtered);
+    setCurrentPage(1);
+  }, [searchText, searchDate]);
+
+  const paginatedData = filteredEarnings.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
 
   const showModal = (transaction) => {
     setSelectedTransaction(transaction);
@@ -75,18 +105,17 @@ const Earnings = () => {
       const leftMargin = 10;
       const detailsStartY = 30;
 
-      doc.rect(leftMargin, detailsStartY, 190, 90);
-      doc.text(`Transaction ID: #${selectedTransaction.id}`, leftMargin + 6, detailsStartY + 10);
+      doc.rect(leftMargin, detailsStartY, 190, 100);
+      doc.text(`Transaction ID: #${selectedTransaction.transactionId}`, leftMargin + 6, detailsStartY + 10);
       doc.text(`User Name: ${selectedTransaction.userName}`, leftMargin + 6, detailsStartY + 20);
-      doc.text(`Location: ${selectedTransaction.location}`, leftMargin + 6, detailsStartY + 30);
-      doc.text(`Date: ${selectedTransaction.date}`, leftMargin + 6, detailsStartY + 40);
-      doc.text(`Withdraw Amount: $${selectedTransaction.amount}`, leftMargin + 6, detailsStartY + 50);
+      doc.text(`Subscription Type: ${selectedTransaction.subscriptionType}`, leftMargin + 6, detailsStartY + 30);
+      doc.text(`Location: ${selectedTransaction.location}`, leftMargin + 6, detailsStartY + 40);
+      doc.text(`Date: ${selectedTransaction.date}`, leftMargin + 6, detailsStartY + 50);
+      doc.text(`Withdraw Amount: $${selectedTransaction.amount}`, leftMargin + 6, detailsStartY + 60);
 
       doc.save("transaction-details.pdf");
     }
   };
-
-  console.log(selectedTransaction);
 
   return (
     <div className="w-full p-5 overflow-x-auto">
@@ -95,53 +124,46 @@ const Earnings = () => {
           <FaAngleLeft /> Earnings
         </h1>
         <div className="flex items-center gap-2">
-          {/* ✅ Date Search */}
           <input
             type="date"
             className="border border-gray-300 px-4 py-2 rounded-md mr-2"
             value={searchDate}
             onChange={(e) => setSearchDate(e.target.value)}
           />
-
-          {/* ✅ Transaction ID Search */}
           <input
             type="text"
-            name="UserName"
+            name="transactionId"
             className="border border-gray-300 px-4 py-2 rounded-md mr-2"
             placeholder="Search by Transaction ID"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
           />
-          <button className="bg-[#038c6d] text-white w-10 h-10 flex items-center justify-center rounded-md ml-2">
+          <button className="bg-[#02aef4] text-white w-10 h-10 flex items-center justify-center rounded-md ml-2">
             <IoSearchOutline />
           </button>
         </div>
       </div>
 
-      <div className="">
-        <table className="w-full border-collapse border-[#92b8c0] min-w-[1000px]">
-          <thead className="bg-[#92b8c0]">
+      <div>
+        <table className="w-full border-collapse border-[#02aef4] min-w-[1000px]">
+          <thead className="bg-[#02aef4] text-white">
             <tr>
+              <th className="border-gray-300 px-4 py-2 text-left">#SI</th>
+              <th className="border-gray-300 px-4 py-2 text-left">User Name</th>
               <th className="border-gray-300 px-4 py-2 text-left">Transaction ID</th>
-              {/* <th className="border-gray-300 px-4 py-2 text-left">Card Brand</th> */}
-              <th className="border-gray-300 px-4 py-2 text-left">Currency</th>
               <th className="border-gray-300 px-4 py-2 text-left">Amount</th>
-              <th className="border-gray-300 px-4 py-2 text-left">Status</th>
-              <th className="border-gray-300 px-4 py-2 text-left">Payment Method</th>
-              <th className="border-gray-300 px-4 py-2 text-left">Date</th>
-              <th className="border-gray-300 px-4 py-2 text-left">Actions</th>
+              <th className="border-gray-300 px-4 py-2 text-left">Subscription Type</th>
+              <th className="border-gray-300 px-4 py-2 text-left">Action</th>
             </tr>
           </thead>
           <tbody>
-            {filteredEarnings.map((row, index) => (
+            {paginatedData.map((row, index) => (
               <tr key={row?.id} className="hover:bg-gray-50">
+                <td className="border-gray-300 px-4 py-2">{(currentPage - 1) * pageSize + index + 1}</td>
+                <td className="border-gray-300 px-4 py-2">{row?.userName}</td>
                 <td className="border-gray-300 px-4 py-2">{row?.transactionId}</td>
-                {/* <td className="border-gray-300 px-4 py-2">{row?.cardBrand}</td> */}
-                <td className="border-gray-300 px-4 py-2">{row?.currency}</td>
-                <td className="border-gray-300 px-4 py-2">{row?.amount}</td>
-                <td className="border-gray-300 px-4 py-2">Success</td>
-                <td className="border-gray-300 px-4 py-2">{row?.status}</td>
-                <td className="border-gray-300 px-4 py-2">{new Date(row?.updatedAt).toLocaleDateString()}</td>
+                <td className="border-gray-300 px-4 py-2">${row?.amount}</td>
+                <td className="border-gray-300 px-4 py-2">{row?.subscriptionType}</td>
                 <td className="border-gray-300 px-4 py-2">
                   <div onClick={() => showModal(row)} className="cursor-pointer">
                     <HiOutlineDotsHorizontal className="text-2xl font-semibold" />
@@ -153,18 +175,16 @@ const Earnings = () => {
         </table>
       </div>
 
-      {/* ✅ Pagination */}
       <div className="flex justify-center mt-4">
         <Pagination
           current={currentPage}
           pageSize={pageSize}
-          total={earningsData?.total || 0}
+          total={filteredEarnings.length}
           onChange={onPageChange}
           showSizeChanger={false}
         />
       </div>
 
-      {/* ✅ Modal for Transaction Details */}
       <Modal visible={isModalVisible} onCancel={handleCancel} footer={null} width={600}>
         {selectedTransaction && (
           <div className="text-black">
@@ -175,34 +195,21 @@ const Earnings = () => {
               <p>{selectedTransaction?.transactionId}</p>
             </div>
 
-            {/* <div className="mb-4 flex items-center justify-between">
-              <p className="font-semibold">Card Brand:</p>
-              <p>{selectedTransaction?.cardBrand}</p>
-            </div> */}
+            <div className="mb-4 flex items-center justify-between">
+              <p className="font-semibold">User Name:</p>
+              <p>{selectedTransaction?.userName}</p>
+            </div>
 
             <div className="mb-4 flex items-center justify-between">
-              <p className="font-semibold">Currency:</p>
-              <p>{selectedTransaction?.currency}</p>
+              <p className="font-semibold">Subscription Type:</p>
+              <p>{selectedTransaction?.subscriptionType}</p>
             </div>
 
             <div className="mb-4 flex items-center justify-between">
               <p className="font-semibold">Amount:</p>
-              <p>{selectedTransaction?.amount}</p>
+              <p>${selectedTransaction?.amount}</p>
             </div>
 
-            <div className="mb-4 flex items-center justify-between">
-              <p className="font-semibold">Status:</p>
-              <p>Success</p>
-            </div>
-
-            <div className="mb-4 flex items-center justify-between">
-              <p className="font-semibold">Payment Method:</p>
-              <p>{selectedTransaction?.status}</p>
-            </div>
-
-            <button onClick={downloadPDF} className="border border-[#92b8c0] w-full px-4 py-2 rounded text-black font-semibold mt-4">
-              Download PDF
-            </button>
           </div>
         )}
       </Modal>

@@ -94,7 +94,7 @@ const PersonalinfoEdit = () => {
                             <div className="relative sm:w-56 w-48 sm:h-56 h-48 rounded-full flex justify-center items-center mt-5 bg-gray-50 border">
                                 <Upload name="profile" showUploadList={false} onChange={handleUploadChange}>
                                     <img className="w-44 h-44 rounded-full" src={imageUrl} alt="Profile" />
-                                    <Button className="border-none text-md text-blue-500 absolute bottom-6 flex items-center" icon={<LuImagePlus size={20} className="mr-2" />}>
+                                    <Button className="border-none text-md text-[#02aef4] absolute bottom-6 flex items-center" icon={<LuImagePlus size={20} className="mr-2" />}>
                                         Change Picture
                                     </Button>
                                 </Upload>
@@ -110,7 +110,7 @@ const PersonalinfoEdit = () => {
                         <div className="flex-1 w-full lg:w-2/3">
                             <div className="flex flex-col gap-6">
                                 <Form.Item label={<span className="text-lg font-medium">Name</span>} name="name">
-                                    <Input placeholder="Name" className="p-4 rounded-lg border-gray-300 focus:ring-blue-500 focus:border-blue-500" />
+                                    <Input placeholder="Name" className="p-4 rounded-lg border-gray-300 focus:ring-[#02aef4] focus:border-[#02aef4]" />
                                 </Form.Item>
 
                                 <Form.Item label={<span className="text-lg font-medium">Email</span>} name="email">
@@ -125,7 +125,7 @@ const PersonalinfoEdit = () => {
                                         onChange={setPhoneNumber}
                                         international
                                         defaultCountry="bd"
-                                        className="rounded-lg border-gray-300 py-3 focus:ring-blue-500 focus:border-blue-500 border-2 px-2"
+                                        className="rounded-lg border-gray-300 py-3 focus:ring-[#02aef4] focus:border-[#02aef4] border-2 px-2"
                                     />
                                 </div>
                             </div>
@@ -134,7 +134,7 @@ const PersonalinfoEdit = () => {
 
                     {/* ✅ Save Changes Button */}
                     <div className="flex sm:justify-end justify-center items-center mt-8">
-                        <Button htmlType="submit" className="h-14 md:px-20 !bg-[#038c6d] !text-white rounded-lg text-lg font-medium">
+                        <Button htmlType="submit" className="h-14 md:px-20 !bg-[#02aef4] !text-white rounded-lg text-lg font-medium">
                             Save Changes
                         </Button>
                     </div>

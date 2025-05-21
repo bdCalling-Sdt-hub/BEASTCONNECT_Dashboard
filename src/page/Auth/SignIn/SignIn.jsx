@@ -65,7 +65,7 @@ const SignIn = () => {
         </div>
         <div className="mt-16 px-8">
           <div className="mb-8">
-            <img src={logoimage} className="w-[200px] mb-5" alt="" />
+            <img src={logoimage} className="w-[100px] mb-5" alt="" />
             <h1 className="font-semibold text-3xl text-gray-800">
               Hello, Welcome!
             </h1>
@@ -130,7 +130,7 @@ const SignIn = () => {
             </div>
 
             <Form.Item>
-              <button loading={isLoading} className="w-full bg-[#84df91] text-xl font-semibold text-white  rounded-md py-2" border={true}>
+              <button loading={isLoading} className="w-full bg-[#02aef4] text-xl font-semibold text-white  rounded-md py-2" border={true}>
                 Login
               </button>
             </Form.Item>

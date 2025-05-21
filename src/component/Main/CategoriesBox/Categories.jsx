@@ -1,301 +1,165 @@
 import React, { useState } from "react";
-import { Modal, Input, message, Pagination } from "antd";
-import { FaPlus } from "react-icons/fa";
-import categoryImage from "/public/category/category.png"; // Update this path as necessary
-import { useAddCategoryMutation, useDeleteCategoryMutation, useGetAllCategoriesQuery, useUpdateCategoryMutation } from "../../../redux/features/category/categoryApi";
-import Url from "../../../redux/baseApi/forImageUrl";
+import { Table, Button, Pagination, Modal, ConfigProvider } from "antd";
+import { EyeOutlined } from "@ant-design/icons";
+import { Link } from "react-router-dom";
+import { FaAngleLeft } from "react-icons/fa";
 
-const Categories = () => {
-  const [isAddModalVisible, setIsAddModalVisible] = useState(false);
-  const [isEditModalVisible, setIsEditModalVisible] = useState(false);
-  const [categoryName, setCategoryName] = useState("");
-  const [image, setImage] = useState(null);
-  const [id, setId] = useState(null);
-  const [currentCategory, setCurrentCategory] = useState(null);
+const data = [
+  {
+    key: "1",
+    userA: "Afsana",
+    userB: "Ariyaan",
+    timeDate: "11 Oct 24, 11:10PM",
+  },
+  {
+    key: "2",
+    userA: "Afsana",
+    userB: "Ariyaan",
+    timeDate: "11 Oct 24, 11:10PM",
+  },
+  {
+    key: "3",
+    userA: "Afsana",
+    userB: "Ariyaan",
+    timeDate: "11 Oct 24, 11:10PM",
+  },
+  // Add more data as needed
+];
+
+const ConnectionMatchDetails = () => {
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize] = useState(4);
+  const pageSize = 10;
 
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedRecord, setSelectedRecord] = useState(null);
 
-  const [addCatagories] = useAddCategoryMutation();
-  const [editCatagories, { isLoading: isUpdating }] = useUpdateCategoryMutation();
-  const { data: allCategories, isLoading } = useGetAllCategoriesQuery();
-  const allMain = allCategories?.data;
+  const columns = [
+    {
+      title: "#SL",
+      dataIndex: "key",
+      key: "key",
+      width: 70,
+      render: (text, record, index) =>
+        (currentPage - 1) * pageSize + index + 1,
+    },
+    {
+      title: "User A",
+      dataIndex: "userA",
+      key: "userA",
+    },
+    {
+      title: "User B",
+      dataIndex: "userB",
+      key: "userB",
+    },
+    {
+      title: "Time & Date",
+      dataIndex: "timeDate",
+      key: "timeDate",
+      width: 180,
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      width: 100,
+      render: (_, record) => (
+        <Link to={`/connection/${record.key}`} >
+          <EyeOutlined className="text-2xl" />
+        </Link>
+      ),
+    },
+  ];
 
-
-  const [deleteCategory] = useDeleteCategoryMutation();
-  // console.log(allCategories?.data);
-
-
-
-
-
-  const [categories, setCategories] = useState([
-    { id: 1, name: "Real Estate", image: categoryImage },
-    { id: 2, name: "Technology", image: categoryImage },
-    { id: 3, name: "Health", image: categoryImage },
-    { id: 4, name: "Education", image: categoryImage },
-    { id: 5, name: "Finance", image: categoryImage },
-    { id: 6, name: "Sports", image: categoryImage },
-    { id: 7, name: "Lifestyle", image: categoryImage },
-    { id: 8, name: "Food", image: categoryImage },
-  ]);
-
-  const showAddModal = () => {
-    setCategoryName("");
-    setImage(null);
-    setIsAddModalVisible(true);
-  };
-
-  const showEditModal = (category) => {
-    setCurrentCategory(category);
-    setCategoryName(category?.name);
-    setImage(category?.imageUrl);
-    setId(category?.id);
-
-    setIsEditModalVisible(true);
-
-    // console.log(category);
-
-
-
-  };
-
-  const closeAddModal = () => {
-    setIsAddModalVisible(false);
-    setCategoryName("");
-    setImage(null);
-  };
-
-  const closeEditModal = () => {
-    setIsEditModalVisible(false);
-    setCategoryName("");
-    setImage(null);
-    setCurrentCategory(null);
-  };
-
-  const handleAddCategory = async (e) => {
-    e.preventDefault();
-    if (!categoryName) {
-      message.error("Please enter a category name!");
-      return;
-    }
-    if (!image) {
-      message.error("Please upload an image!");
-      return;
-    }
-
-
-    const formData = new FormData();
-    formData.append("name", categoryName);
-    formData.append("image", image);
-
-    try {
-
-      const res = await addCatagories(formData).unwrap();
-
-      console.log(res);
-      if (res.error) {
-        message.error(res.error.data.message);
-      }
-
-      if (res.success) {
-        message.success("Category added successfully!");
-        closeAddModal();
-      }
-
-
-    } catch (error) {
-      console.error(error?.data?.message);
-      message.error(error?.data?.message);
-    }
-
-
-
-  };
-
-  const handleEditCategory = async (e) => {
-    e.preventDefault();
-
-    const form = e.target;
-
-    const formData = new FormData();
-    const image2 = form?.image?.files[0];
-    if (image2) {
-      formData.append("image", image2);
-    }
-    const categoryName2 = form?.categoryName?.value;
-    if (categoryName2) {
-      formData.append("name", categoryName2);
-    }
-    formData.append("id", id);
-    console.log(id + " " + categoryName + " " + image2);
-
-
-    try {
-
-      const res = await editCatagories({ data: formData });
-      console.log(res);
-      if (res?.data?.error) {
-        message.error(res?.data?.error?.data?.message);
-      }
-      if (res?.data?.success) {
-        message.success(res?.data?.message);
-      }
-
-    } catch (error) {
-      console.log('error');
-      console.log(error);
-    }
-
-
-    // setCategories(updatedCategories);
-    // closeEditModal();
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-    }
-  };
-
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-  };
-
-  const paginatedCategories = categories.slice(
+  const paginatedData = data.slice(
     (currentPage - 1) * pageSize,
     currentPage * pageSize
   );
 
-  const handleDeleteCategory = async (categoryId) => {
-    console.log(categoryId?.id);
-
-    try {
-
-      const res = await deleteCategory(categoryId?.id).unwrap();
-
-      console.log(res);
-      // message.success(res?.message);
-
-      if (res) {
-        message.success(res?.message);
-      }
-
-
-    } catch (error) {
-      console.log(error);
-    }
-
-  }
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+    setSelectedRecord(null);
+  };
 
   return (
-    <section>
-      <div className="w-full md:flex justify-end items-center py-6">
-        <button
-          className="px-2 md:px-5 py-3 text-xl bg-[#038c6d] text-white flex justify-center items-center gap-1 rounded md:mb-0"
-          onClick={showAddModal}
+    <div className="p-6">
+      {/* Back link */}
+      <div className="mb-4 flex items-center justify-between flex-wrap">
+        <Link
+          to="/connection"
+          className="flex text-2xl items-center gap-2 text-gray-700 mb-6 hover:text-blue-600"
         >
-          <FaPlus className="text-xl font-semibold text-white" /> Add Category
-        </button>
-      </div>
+          <FaAngleLeft /> Connection Match Details
+        </Link>
 
-      <div className="grid xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 gap-5">
-        {allMain?.map((category) => (
-          <div key={category?.id} className="border-shadow pb-5 rounded-lg overflow-hidden">
-            <img className="w-full max-h-[250px]" src={Url + category?.imageUrl} alt="Category" />
-            <div>
-              <h2 className="my-5 text-3xl font-semibold text-center">{category?.name}</h2>
-            </div>
-            <div className="grid grid-cols-2 gap-3 px-5">
-              <button
-                className="w-full py-3 px-6 border border-[#038c6d] rounded-lg"
-                onClick={() => handleDeleteCategory(category)}
-              >
-                Delete
-              </button>
-              <button
-                className="w-full py-3 px-6 border bg-[#038c6d] text-white rounded-lg"
-                onClick={() => showEditModal(category)}
-              >
-                Edit Category
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
+        {/* Filter badge */}
+        <div className="flex justify-end mb-3 cursor-pointer">
+          <span className="bg-blue-100 text-blue-800 px-8 py-2 rounded text-base font-medium select-none">
+            Filter : Month
+          </span>
+        </div>
 
-      {/* <div className="flex justify-center mt-10">
+      </div>
+      {/* Table */}
+      <ConfigProvider
+        theme={{
+          components: {
+            Table: {
+              headerBg: "#02aef4",
+              headerColor: "#fff",
+              headerBorderRadius: 5,
+            },
+          },
+        }}
+      >
+        <Table
+          columns={columns}
+          dataSource={paginatedData}
+          pagination={false}
+          bordered
+          rowClassName={(record, index) =>
+            index % 2 === 0 ? "bg-gray-50" : undefined
+          }
+          scroll={{ x: 600 }}
+        />
+      </ConfigProvider>
+
+      {/* Pagination */}
+      <div className="flex justify-end mt-4">
         <Pagination
           current={currentPage}
+          total={data.length}
           pageSize={pageSize}
-          total={categories.length}
-          onChange={handlePageChange}
+          onChange={setCurrentPage}
+          showSizeChanger={false}
+          size="small"
         />
-      </div> */}
+      </div>
 
-      {/* Add Modal */}
-      <Modal title="Add Category" visible={isAddModalVisible} onCancel={closeAddModal} footer={null}>
-        <form onSubmit={handleAddCategory} action="">
-          <div className="my-5">
-            <span className="mb-3 font-semibold text-base">Category Name</span>
-            <Input
-              placeholder="Enter category name"
-              value={categoryName}
-              onChange={(e) => setCategoryName(e.target.value)}
-            />
+      {/* Modal for details */}
+      <Modal
+        title={`Match Details${selectedRecord ? `: #${selectedRecord.key}` : ""}`}
+        visible={isModalVisible}
+        onCancel={handleModalClose}
+        footer={null}
+        centered
+      >
+        {selectedRecord && (
+          <div className="space-y-3 text-gray-800">
+            <p>
+              <strong>User A:</strong> {selectedRecord.userA}
+            </p>
+            <p>
+              <strong>User B:</strong> {selectedRecord.userB}
+            </p>
+            <p>
+              <strong>Time & Date:</strong> {selectedRecord.timeDate}
+            </p>
+            {/* Add more details here if available */}
           </div>
-
-          <div className="my-5 w-full">
-            <span className="mb-3 font-semibold text-base block">Category Image</span>
-            <input
-              type="file"
-              accept="image/*"
-              className="block w-full border-dashed border-gray-300 rounded-lg p-2"
-              onChange={handleFileChange}
-            />
-          </div>
-
-          <button className="w-full py-3 bg-[#038c6d] text-white rounded-lg" onClick={handleAddCategory}>
-            Add Category
-          </button>
-        </form>
+        )}
       </Modal>
-
-      {/* Edit Modal */}
-      <Modal title="Edit Category" visible={isEditModalVisible} onCancel={closeEditModal} footer={null}>
-
-        <form onSubmit={handleEditCategory} action="">
-          <div className="my-5">
-            <span className="mb-3 font-semibold text-base">Category Name</span>
-            <Input
-              placeholder="Enter category name"
-              value={categoryName}
-              name="categoryName"
-              onChange={(e) => setCategoryName(e.target.value)}
-            />
-          </div>
-
-          <div className="my-5 w-full">
-            <span className="mb-3 font-semibold text-base block">Category Image</span>
-            <img src={Url + image} alt="" />
-            <input
-              type="file"
-              accept="image/*"
-              name="image"
-              className="block w-full border-dashed border-gray-300 rounded-lg p-2" onChange={handleFileChange}
-            />
-
-
-          </div>
-
-          <button className="w-full py-3 bg-[#038c6d] text-white rounded-lg" >
-            Edit Category
-          </button>
-        </form>
-      </Modal>
-    </section>
+    </div>
   );
 };
 
-export default Categories;
+export default ConnectionMatchDetails;
